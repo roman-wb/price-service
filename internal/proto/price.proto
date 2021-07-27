@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/roman-wb/price-service/proto";
+
+package proto;
+
+service Price {
+  rpc Fetch(FetchRequest) returns (FetchReply) {}
+  //   rpc List(ListRequest) returns (ListReply) {}
+}
+
+message FetchRequest { string url = 1; }
+
+message FetchReply {
+  string status = 1;
+  string message = 2;
+}
