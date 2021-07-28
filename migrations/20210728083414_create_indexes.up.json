@@ -1,0 +1,15 @@
+[
+  {
+    "createIndexes": "prices",
+    "indexes": [
+      {
+        "key": {
+          "name": 1
+        },
+        "name": "name_sort_by_asc_unique",
+        "unique": true,
+        "background": true
+      }
+    ]
+  }
+]

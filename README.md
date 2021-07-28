@@ -1,14 +1,12 @@
 ### TODO:
 
-- logic repo
-- save / get repo
-- dockerize
+- get list (many orders and offset)
+- balancer
 
 ### Backlog:
 
 - zap logger
-- optimize parser
-- limit http timeout
+- limit http timeouts
 
 ### Improves:
 

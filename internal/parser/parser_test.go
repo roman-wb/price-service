@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/roman-wb/price-service/internal/models"
-	"github.com/roman-wb/price-service/internal/parser/mock_parser"
+	"github.com/roman-wb/price-service/internal/parser/mocks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -47,19 +47,18 @@ func TestParse(t *testing.T) {
 			mockHttpResp: &http.Response{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte(``))),
 			},
-			wantData: nil,
 		},
 		{
 			name: "Parsed data",
 			url:  "http://yandex.ru/price",
 			mockHttpResp: &http.Response{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte(`
-				Product 1;-1
-				Product 2;0
-				Product 3;0.99
-				Product 4;error
-				Product 4;100.99
-			`))),
+					Product 1;-1
+					Product 2;0
+					Product 3;0.99
+					Product 4;error
+					Product 4;100.99
+				`))),
 			},
 			wantData: []models.Price{
 				{Name: "Product 1", Price: -1},
@@ -75,25 +74,23 @@ func TestParse(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			var mock *mock_parser.MockHttpClient
-			var gotData []models.Price
-			var gotErr error
-
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
+			var mockHttpClient *mocks.MockHttpClient
+
 			if tc.mockHttpResp != nil || tc.mockHttpErr != nil {
-				mock = mock_parser.NewMockHttpClient(ctrl)
-				mock.
+				mockHttpClient = mocks.NewMockHttpClient(ctrl)
+				mockHttpClient.
 					EXPECT().
 					Get(tc.url).
 					Return(tc.mockHttpResp, tc.mockHttpErr)
 			}
 
-			parser := NewParser(mock)
-			gotData, gotErr = parser.Do(tc.url)
+			parser := NewParser(mockHttpClient)
 
-			require.Equal(t, len(tc.wantData), len(gotData))
+			gotData, gotErr := parser.Do(tc.url)
+
 			require.Equal(t, tc.wantData, gotData)
 			if tc.wantErr != nil {
 				require.Equal(t, tc.wantErr.Error(), gotErr.Error())

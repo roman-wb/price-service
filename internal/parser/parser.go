@@ -1,4 +1,4 @@
-//go:generate mockgen -destination mock_parser/http_client.go . HttpClient
+//go:generate mockgen -destination mocks/parser.go -package=mocks . HttpClient
 
 package parser
 
@@ -28,23 +28,23 @@ func NewParser(httpClient HttpClient) *Parser {
 }
 
 func (p *Parser) Do(rawurl string) ([]models.Price, error) {
-	// validate
+	// Validate URL
 	_, err := url.ParseRequestURI(rawurl)
 	if err != nil {
 		return nil, err
 	}
 
-	// request
+	// HTTP request
 	resp, err := p.httpClient.Get(rawurl)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	return p.Parse(resp.Body)
+	return p.parse(resp.Body)
 }
 
-func (p *Parser) Parse(body io.ReadCloser) ([]models.Price, error) {
+func (p *Parser) parse(body io.ReadCloser) ([]models.Price, error) {
 	var prices []models.Price
 
 	reader := csv.NewReader(body)
