@@ -5,7 +5,6 @@
 
 ### Backlog:
 
-- col csv separator to params Fetch
 - zap logger
 
 ### Improves:

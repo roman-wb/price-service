@@ -47,7 +47,7 @@ func (s *PriceServer) Fetch(ctx context.Context, in *pb.FetchRequest) (*pb.Fetch
 		return nil, err
 	}
 
-	return nil, nil
+	return &pb.FetchReply{}, nil
 }
 
 func (s *PriceServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {

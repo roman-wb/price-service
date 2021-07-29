@@ -80,7 +80,7 @@ func TestPriceServerFetch(t *testing.T) {
 			mockParserErr:    nil,
 			mockPriceRepoErr: nil,
 
-			wantReply: nil,
+			wantReply: &pb.FetchReply{},
 			wantErr:   nil,
 		},
 	}
