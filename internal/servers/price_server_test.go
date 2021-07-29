@@ -18,12 +18,15 @@ func TestNewPriceServer(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	wantMockLogger := mocks.NewMockLogger(ctrl)
+	wantMockLogger.EXPECT().Infof(gomock.Any()).AnyTimes()
 	wantMockParser := mocks.NewMockParser(ctrl)
 	wantMockPriceRepo := mocks.NewMockPriceRepo(ctrl)
 
-	gotPriceServer := NewPriceServer(wantMockParser, wantMockPriceRepo)
+	gotPriceServer := NewPriceServer(wantMockLogger, wantMockParser, wantMockPriceRepo)
 
 	require.NotNil(t, gotPriceServer)
+	require.Equal(t, wantMockLogger, gotPriceServer.logger)
 	require.Equal(t, wantMockParser, gotPriceServer.parser)
 	require.Equal(t, wantMockPriceRepo, gotPriceServer.priceRepo)
 }
@@ -93,6 +96,8 @@ func TestPriceServerFetch(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
+			mockLogger := mocks.NewMockLogger(ctrl)
+			mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 			mockParser := mocks.NewMockParser(ctrl)
 			mockParser.
 				EXPECT().
@@ -107,7 +112,7 @@ func TestPriceServerFetch(t *testing.T) {
 					Return(tc.mockPriceRepoErr)
 			}
 
-			priceServer := NewPriceServer(mockParser, mockPriceRepo)
+			priceServer := NewPriceServer(mockLogger, mockParser, mockPriceRepo)
 			request := &pb.FetchRequest{Url: tc.url}
 
 			gotReply, gotErr := priceServer.Fetch(context.Background(), request)
@@ -193,13 +198,15 @@ func TestPriceServerList(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
+			mockLogger := mocks.NewMockLogger(ctrl)
+			mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 			mockPriceRepo := mocks.NewMockPriceRepo(ctrl)
 			mockPriceRepo.
 				EXPECT().
 				List(tc.skip, tc.limit, tc.orderBy, tc.orderType).
 				Return(tc.mockPriceRepoPrices, tc.mockPriceRepoErr)
 
-			priceServer := NewPriceServer(nil, mockPriceRepo)
+			priceServer := NewPriceServer(mockLogger, nil, mockPriceRepo)
 			request := &pb.ListRequest{Skip: int64(tc.skip), Limit: int64(tc.limit), OrderBy: tc.orderBy, OrderType: int32(tc.orderType)}
 
 			gotReply, gotErr := priceServer.List(context.Background(), request)

@@ -1,15 +1,18 @@
-//go:generate mockgen -destination mocks/price_server.go -package=mocks . Parser,PriceRepo
+//go:generate mockgen -destination mocks/price_server.go -package=mocks . Logger,Parser,PriceRepo
 
 package servers
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/roman-wb/price-service/internal/models"
 	pb "github.com/roman-wb/price-service/internal/proto"
 )
+
+type Logger interface {
+	Infof(template string, args ...interface{})
+}
 
 type Parser interface {
 	Fetch(rawurl string) ([]models.Price, error)
@@ -23,19 +26,21 @@ type PriceRepo interface {
 type PriceServer struct {
 	pb.UnimplementedPriceServer
 
+	logger    Logger
 	parser    Parser
 	priceRepo PriceRepo
 }
 
-func NewPriceServer(parser Parser, priceRepo PriceRepo) PriceServer {
+func NewPriceServer(logger Logger, parser Parser, priceRepo PriceRepo) PriceServer {
 	return PriceServer{
+		logger:    logger,
 		parser:    parser,
 		priceRepo: priceRepo,
 	}
 }
 
 func (s *PriceServer) Fetch(ctx context.Context, in *pb.FetchRequest) (*pb.FetchReply, error) {
-	log.Printf("Received URL: %v", in.Url)
+	s.logger.Infof("Received: %v", in)
 
 	prices, err := s.parser.Fetch(in.Url)
 	if err != nil {
@@ -51,7 +56,7 @@ func (s *PriceServer) Fetch(ctx context.Context, in *pb.FetchRequest) (*pb.Fetch
 }
 
 func (s *PriceServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
-	log.Printf("Received: %v", in)
+	s.logger.Infof("Received: %v", in)
 
 	prices, err := s.priceRepo.List(int(in.Skip), int(in.Limit), in.OrderBy, in.OrderType)
 	if err != nil {

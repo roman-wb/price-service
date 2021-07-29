@@ -2,33 +2,38 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/purini-to/zapmw"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func main() {
-	router := newRouter()
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync()
+
+	router := newRouter(logger)
 
 	addr := ":3000"
-	log.Println("Static server listen on " + addr)
+	logger.Sugar().Infof("Static server listen on %s", addr)
 	err := http.ListenAndServe(addr, router)
 	if err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
+		logger.Sugar().Fatal(err)
 	}
 }
 
-func newRouter() *mux.Router {
+func newRouter(logger *zap.Logger) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	router.Use(func(next http.Handler) http.Handler {
-		return handlers.LoggingHandler(os.Stdout, next)
-	})
+	router.Use(
+		zapmw.WithZap(logger),
+		zapmw.Request(zapcore.InfoLevel, "request"),
+		zapmw.Recoverer(zapcore.ErrorLevel, "recover", zapmw.RecovererDefault),
+	)
 	static := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	router.PathPrefix("/static/").Handler(static)
 	router.HandleFunc("/generator.csv", generatorHandler)

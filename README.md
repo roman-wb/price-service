@@ -2,10 +2,7 @@
 
 - balancer
 - readme
-
-### Backlog:
-
-- zap logger
+- e2e
 
 ### Improves:
 
