@@ -4,14 +4,31 @@ option go_package = "github.com/roman-wb/price-service/proto";
 
 package proto;
 
+import "google/protobuf/timestamp.proto";
+
 service Price {
   rpc Fetch(FetchRequest) returns (FetchReply) {}
-  //   rpc List(ListRequest) returns (ListReply) {}
+  rpc List(ListRequest) returns (ListReply) {}
 }
 
 message FetchRequest { string url = 1; }
 
-message FetchReply {
-  string status = 1;
-  string message = 2;
+message FetchReply {}
+
+message ListRequest {
+  int64 skip = 2;
+  int64 limit = 3;
+  string order_by = 4;
+  int32 order_type = 5;
+}
+
+message ListReply {
+  message Price {
+    string name = 1;
+    double price = 2;
+    int64 changes = 3;
+    google.protobuf.Timestamp updated_at = 4;
+  }
+
+  repeated Price results = 3;
 }

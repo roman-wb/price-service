@@ -12,11 +12,12 @@ import (
 )
 
 type Parser interface {
-	Do(rawurl string) ([]models.Price, error)
+	Fetch(rawurl string) ([]models.Price, error)
 }
 
 type PriceRepo interface {
 	Import(updatedAt time.Time, prices []models.Price) error
+	List(skip int, limit int, orderBy string, orderType int32) ([]models.Price, error)
 }
 
 type PriceServer struct {
@@ -36,17 +37,31 @@ func NewPriceServer(parser Parser, priceRepo PriceRepo) PriceServer {
 func (s *PriceServer) Fetch(ctx context.Context, in *pb.FetchRequest) (*pb.FetchReply, error) {
 	log.Printf("Received URL: %v", in.Url)
 
-	// Parse
-	prices, err := s.parser.Do(in.Url)
+	prices, err := s.parser.Fetch(in.Url)
 	if err != nil {
-		return &pb.FetchReply{Status: "error", Message: err.Error()}, nil
+		return nil, err
 	}
 
-	// Import
 	err = s.priceRepo.Import(time.Now().UTC(), prices)
 	if err != nil {
-		return &pb.FetchReply{Status: "error", Message: err.Error()}, nil
+		return nil, err
 	}
 
-	return &pb.FetchReply{Status: "ok"}, nil
+	return nil, nil
+}
+
+func (s *PriceServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
+	log.Printf("Received: %v", in)
+
+	prices, err := s.priceRepo.List(int(in.Skip), int(in.Limit), in.OrderBy, in.OrderType)
+	if err != nil {
+		return nil, err
+	}
+
+	results := []*pb.ListReply_Price{}
+	for _, price := range prices {
+		results = append(results, price.ToPBListReplyPrice())
+	}
+
+	return &pb.ListReply{Results: results}, nil
 }

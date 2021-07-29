@@ -13,12 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParse(t *testing.T) {
+func TestParserFetch(t *testing.T) {
 	testCases := []struct {
 		name string
-		url  string
 
-		mockBody     string
+		url string
+
 		mockHttpResp *http.Response
 		mockHttpErr  error
 
@@ -26,31 +26,48 @@ func TestParse(t *testing.T) {
 		wantErr  error
 	}{
 		{
-			name:    "Empty URL",
-			url:     "",
-			wantErr: errors.New(`parse "": empty url`),
+			name: "Empty URL",
+
+			url: "",
+
+			wantData: nil,
+			wantErr:  errors.New(`parse "": empty url`),
 		},
 		{
-			name:    "Invalid URL",
-			url:     "yandex.ru/price",
-			wantErr: errors.New(`parse "yandex.ru/price": invalid URI for request`),
+			name: "Invalid URL",
+
+			url: "yandex.ru/price",
+
+			wantData: nil,
+			wantErr:  errors.New(`parse "yandex.ru/price": invalid URI for request`),
 		},
 		{
-			name:        "Http error",
-			url:         "http://yandex.ru/price",
+			name: "Http request returns error",
+
+			url: "http://yandex.ru/price",
+
 			mockHttpErr: errors.New("http error..."),
-			wantErr:     errors.New(`http error...`),
+
+			wantData: nil,
+			wantErr:  errors.New(`http error...`),
 		},
 		{
-			name: "Empty data",
-			url:  "http://yandex.ru/price",
+			name: "Http request returns empty data",
+
+			url: "http://yandex.ru/price",
+
 			mockHttpResp: &http.Response{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte(``))),
 			},
+
+			wantData: nil,
+			wantErr:  nil,
 		},
 		{
 			name: "Parsed data",
-			url:  "http://yandex.ru/price",
+
+			url: "http://yandex.ru/price",
+
 			mockHttpResp: &http.Response{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte(`
 					Product 1;-1
@@ -60,12 +77,14 @@ func TestParse(t *testing.T) {
 					Product 4;100.99
 				`))),
 			},
+
 			wantData: []models.Price{
 				{Name: "Product 1", Price: -1},
 				{Name: "Product 2", Price: 0},
 				{Name: "Product 3", Price: 0.99},
 				{Name: "Product 4", Price: 100.99},
 			},
+			wantErr: nil,
 		},
 	}
 
@@ -78,7 +97,6 @@ func TestParse(t *testing.T) {
 			defer ctrl.Finish()
 
 			var mockHttpClient *mocks.MockHttpClient
-
 			if tc.mockHttpResp != nil || tc.mockHttpErr != nil {
 				mockHttpClient = mocks.NewMockHttpClient(ctrl)
 				mockHttpClient.
@@ -89,7 +107,7 @@ func TestParse(t *testing.T) {
 
 			parser := NewParser(mockHttpClient)
 
-			gotData, gotErr := parser.Do(tc.url)
+			gotData, gotErr := parser.Fetch(tc.url)
 
 			require.Equal(t, tc.wantData, gotData)
 			if tc.wantErr != nil {

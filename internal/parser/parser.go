@@ -27,14 +27,12 @@ func NewParser(httpClient HttpClient) *Parser {
 	}
 }
 
-func (p *Parser) Do(rawurl string) ([]models.Price, error) {
-	// Validate URL
+func (p *Parser) Fetch(rawurl string) ([]models.Price, error) {
 	_, err := url.ParseRequestURI(rawurl)
 	if err != nil {
 		return nil, err
 	}
 
-	// HTTP request
 	resp, err := p.httpClient.Get(rawurl)
 	if err != nil {
 		return nil, err
@@ -45,11 +43,11 @@ func (p *Parser) Do(rawurl string) ([]models.Price, error) {
 }
 
 func (p *Parser) parse(body io.ReadCloser) ([]models.Price, error) {
-	var prices []models.Price
-
 	reader := csv.NewReader(body)
 	reader.Comma = ';'
 	reader.FieldsPerRecord = 2
+
+	var prices []models.Price
 
 	for {
 		record, err := reader.Read()

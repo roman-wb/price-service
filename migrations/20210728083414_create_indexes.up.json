@@ -7,8 +7,50 @@
           "name": 1
         },
         "name": "name_sort_by_asc_unique",
-        "unique": true,
-        "background": true
+        "unique": true
+      },
+      {
+        "key": {
+          "name": -1
+        },
+        "name": "name_sort_by_desc_unique",
+        "unique": true
+      },
+      {
+        "key": {
+          "price": 1
+        },
+        "name": "price_sort_by_asc"
+      },
+      {
+        "key": {
+          "price": -1
+        },
+        "name": "price_sort_by_desc"
+      },
+      {
+        "key": {
+          "changes": 1
+        },
+        "name": "changes_sort_by_asc"
+      },
+      {
+        "key": {
+          "changes": -1
+        },
+        "name": "changes_sort_by_desc"
+      },
+      {
+        "key": {
+          "updated_at": 1
+        },
+        "name": "updated_at_sort_by_asc"
+      },
+      {
+        "key": {
+          "updated_at": -1
+        },
+        "name": "updated_at_sort_by_desc"
       }
     ]
   }

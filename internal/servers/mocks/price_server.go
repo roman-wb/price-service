@@ -35,19 +35,19 @@ func (m *MockParser) EXPECT() *MockParserMockRecorder {
 	return m.recorder
 }
 
-// Do mocks base method.
-func (m *MockParser) Do(arg0 string) ([]models.Price, error) {
+// Fetch mocks base method.
+func (m *MockParser) Fetch(arg0 string) ([]models.Price, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Do", arg0)
+	ret := m.ctrl.Call(m, "Fetch", arg0)
 	ret0, _ := ret[0].([]models.Price)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Do indicates an expected call of Do.
-func (mr *MockParserMockRecorder) Do(arg0 interface{}) *gomock.Call {
+// Fetch indicates an expected call of Fetch.
+func (mr *MockParserMockRecorder) Fetch(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Do", reflect.TypeOf((*MockParser)(nil).Do), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Fetch", reflect.TypeOf((*MockParser)(nil).Fetch), arg0)
 }
 
 // MockPriceRepo is a mock of PriceRepo interface.
@@ -85,4 +85,19 @@ func (m *MockPriceRepo) Import(arg0 time.Time, arg1 []models.Price) error {
 func (mr *MockPriceRepoMockRecorder) Import(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Import", reflect.TypeOf((*MockPriceRepo)(nil).Import), arg0, arg1)
+}
+
+// List mocks base method.
+func (m *MockPriceRepo) List(arg0, arg1 int, arg2 string, arg3 int32) ([]models.Price, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].([]models.Price)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockPriceRepoMockRecorder) List(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockPriceRepo)(nil).List), arg0, arg1, arg2, arg3)
 }

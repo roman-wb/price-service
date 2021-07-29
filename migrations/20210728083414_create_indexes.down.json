@@ -1,6 +1,15 @@
 [
   {
     "dropIndexes": "prices",
-    "index": "name_sort_by_asc_unique"
+    "index": [
+      "name_sort_by_asc_unique",
+      "name_sort_by_desc_unique",
+      "price_sort_by_asc",
+      "price_sort_by_desc",
+      "changes_sort_by_asc",
+      "changes_sort_by_desc",
+      "updated_at_sort_by_asc",
+      "updated_at_sort_by_desc"
+    ]
   }
 ]
