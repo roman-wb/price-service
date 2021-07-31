@@ -72,6 +72,8 @@ grpcurl -plaintext -d '{"skip": 0, "limit": 1, "order_by": "price", "order_type"
 
 ### Production (environment: prod)
 
+Service scaled to 2 instaces and available via nginx
+
 ```bash
 # Clone repo
 git clone github.com/roman-wb/price-service
