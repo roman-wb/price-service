@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"flag"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
@@ -19,22 +21,29 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const (
-	Addr     = ":50051"
-	MongoDB  = "price_service"
-	MongoURI = "mongodb://localhost:27017/" + MongoDB
-)
+var addr = flag.String("addr", "localhost:50051", "Listen on host:port")
+var mode = flag.String("mode", "dev", "Run mode dev or prod")
+var mongo = flag.String("mongo", "mongodb://localhost:27017", "URL to MongoDB without db name")
+var dbName = flag.String("dbname", "price_service", "Database name")
 
 func main() {
+	flag.Parse()
+
 	// Logger
-	logger, _ := zap.NewDevelopment()
-	defer logger.Sync()
+	var logger *zap.Logger
+	if *mode == "prod" {
+		logger, _ = zap.NewProduction()
+	} else {
+		logger, _ = zap.NewDevelopment()
+	}
+	defer logger.Sync() //nolint:errcheck
 
 	// Mongo
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client, err := database.NewClient(ctx, MongoURI, "file://migrations")
+	connURL := strings.TrimRight(*mongo, "/") + "/" + *dbName
+	client, err := database.NewClient(ctx, connURL, "file://migrations")
 	if err != nil {
 		logger.Sugar().Fatalf("failed connection to mongo: %v", err)
 	}
@@ -46,7 +55,7 @@ func main() {
 		}
 	}()
 
-	db := client.Database(MongoDB)
+	db := client.Database(*dbName)
 
 	// Deps
 	parser := parser.NewParser(&http.Client{})
@@ -59,8 +68,8 @@ func main() {
 	pb.RegisterPriceServer(grpcServer, &priceServer)
 
 	// Server
-	logger.Sugar().Infof("Service listen on %s", Addr)
-	listen, err := net.Listen("tcp", Addr)
+	logger.Sugar().Infof("Service listen on %s", *addr)
+	listen, err := net.Listen("tcp", *addr)
 	if err != nil {
 		logger.Sugar().Fatalf("failed to listen: %v", err)
 	}

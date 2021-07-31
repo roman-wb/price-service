@@ -1,6 +1,6 @@
 {
   "code-runner.executorMap": {
-    "go": "make run-service"
+    "go": "make run-dev-service"
   } //,
   // "go.testFlags": ["-v"]
 }

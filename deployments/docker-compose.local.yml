@@ -1,0 +1,28 @@
+version: "3.1"
+services:
+  mongo:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo:/data/db
+  service:
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile.service
+    depends_on:
+      - mongo
+    ports:
+      - "50051:50051"
+    restart: unless-stopped
+    command: sh -c './wait-for-it.sh mongo:27017 -- ./service -mode prod -addr 0.0.0.0:50051 -mongo mongodb://mongo:27017 -dbname price_service'
+  static-server:
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile.static-server
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+volumes:
+  mongo:

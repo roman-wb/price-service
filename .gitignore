@@ -8,6 +8,7 @@
 /bin/*
 !/bin/.keep
 .DS_Store
+TASKS.md
 # Test binary, built with `go test -c`
 *.test
 

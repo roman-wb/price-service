@@ -1,0 +1,15 @@
+language: go
+
+services:
+  - docker
+
+go:
+  - 1.16
+
+script:
+  - docker run --rm -v `pwd`:/app -w /app golangci/golangci-lint golangci-lint run -v
+  - docker-compose -f deployments/docker-compose.dev.yml up -d
+  - make test
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

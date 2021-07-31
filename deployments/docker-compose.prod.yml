@@ -1,0 +1,26 @@
+version: "3.1"
+services:
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - service
+    ports:
+      - "50051:50051"
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+    volumes:
+      - mongo:/data/db
+  service:
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile.service
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    command: sh -c './wait-for-it.sh mongo:27017 -- ./service -mode prod -addr 0.0.0.0:50051 -mongo mongodb://mongo:27017 -dbname price_service'
+volumes:
+  mongo:

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -13,15 +14,24 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var addr = flag.String("addr", "localhost:3000", "Listen on host:port")
+var mode = flag.String("mode", "dev", "Run mode dev or prod")
+
 func main() {
-	logger, _ := zap.NewDevelopment()
-	defer logger.Sync()
+	flag.Parse()
+
+	var logger *zap.Logger
+	if *mode == "prod" {
+		logger, _ = zap.NewProduction()
+	} else {
+		logger, _ = zap.NewDevelopment()
+	}
+	defer logger.Sync() //nolint:errcheck
 
 	router := newRouter(logger)
 
-	addr := ":3000"
-	logger.Sugar().Infof("Static server listen on %s", addr)
-	err := http.ListenAndServe(addr, router)
+	logger.Sugar().Infof("Static server listen on %s", *addr)
+	err := http.ListenAndServe(*addr, router)
 	if err != nil && err != http.ErrServerClosed {
 		logger.Sugar().Fatal(err)
 	}
@@ -59,6 +69,6 @@ func generatorHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Expires", "0")
 		}
 
-		w.Write([]byte(row))
+		w.Write([]byte(row)) //nolint:errcheck
 	}
 }
