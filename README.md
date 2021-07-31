@@ -72,7 +72,7 @@ grpcurl -plaintext -d '{"skip": 0, "limit": 1, "order_by": "price", "order_type"
 
 ### Production (environment: prod)
 
-Service scaled to 2 instaces and available via nginx
+Service scaled to 2 instances and available via nginx
 
 ```bash
 # Clone repo
